@@ -1,12 +1,17 @@
 from selenium import webdriver
 from time import sleep
+from bs4 import BeautifulSoup as bs
+import yaml
+
+with open(r'creds.yaml') as file:
+    creds = yaml.load(file, Loader=yaml.FullLoader)
 
 driver = webdriver.Chrome(executable_path='C:\Python\workspace\instabot\chromedriver\chromedriver.exe')
 
 driver.get('https://www.instagram.com')
 
-username = 'andrewlorenphoto'
-password = 'DTgQsz00TyYL'
+username = creds['username']
+password = creds['password']
 
 sleep(2)
 
@@ -39,6 +44,8 @@ while likes <= 1:
         followers = driver.find_element_by_xpath("//a[@href='/{}/followers/']".format(p))
         followers.click()
         
+        sleep(1)
+        
         fBody  = driver.find_element_by_xpath("//div[@class='isgrP']")
         
         scroll = 0
@@ -49,19 +56,34 @@ while likes <= 1:
 
         fList = [my_elem.get_attribute("href") for my_elem in driver.find_elements_by_xpath("//div[@class='isgrP']//a")]
         fList_unique = list(dict.fromkeys(fList))
-
         
-        #fList  = driver.find_elements_by_xpath("//div[@class='isgrP']//a").get_attribute('href')
-        print(fList_unique)
-        #for f in fList:
-        #    print(f.get_attribute('href'))
-    
-        #sleep(2)
-        
-        for f in fList_unique[0:2]:
+        for f in fList_unique:
             driver.get(f)
-            sleep(5)
-    
+                       
+            sleep(2)
+            
+            driver.execute_script("window.scrollTo(0, 200);")
+            
+            sleep(1)
+            
+            try:
+                pic = driver.find_element_by_class_name("kIKUG")  
+                pic.click()
+            
+                sleep(2)
+                
+                like = driver.find_element_by_class_name('fr66n')
+                soup = bs(like.get_attribute('innerHTML'),'html.parser')
+                if(soup.find('svg')['aria-label'] == 'Like'):
+                    like.click()
+                    
+                sleep(2)                
+                
+            except:
+                print("No pics")
+                
+            sleep(3)
+        
         likes+=1
 
 driver.close()
