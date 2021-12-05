@@ -7,19 +7,25 @@ import yaml
 with open(r'creds.yaml') as file:
     creds = yaml.load(file, Loader=yaml.FullLoader)
 
-driver = webdriver.Chrome(executable_path='C:\Python\workspace\instabot\chromedriver\chromedriver.exe')
+driver = webdriver.Chrome(executable_path='/Users/andrew/Documents/workspace/instabot/chromedriver/chromedriver')
 
 driver.get('https://www.instagram.com')
 
 username = creds['username']
 password = creds['password']
 
-sleep(2)
+min_wait_time = 6
+max_wait_time = 8
 
-cookies_popup = driver.find_element_by_class_name("bIiDR")
-cookies_popup.click()
+def get_wait_time(min_wait_time,max_wait_time):
+    return random.randint(min_wait_time, max_wait_time)	
 
-sleep(2)
+sleep(get_wait_time(min_wait_time,max_wait_time))
+
+#cookies_popup = driver.find_element_by_class_name("bIiDR")
+#cookies_popup.click()
+
+#sleep(get_wait_time(min_wait_time,max_wait_time))
 
 username_input = driver.find_element_by_css_selector("input[name='username']")
 password_input = driver.find_element_by_css_selector("input[name='password']")
@@ -30,28 +36,28 @@ password_input.send_keys(password)
 login_button = driver.find_element_by_xpath("//button[@type='submit']")
 login_button.click()
 
-sleep(3)
+sleep(get_wait_time(min_wait_time,max_wait_time))
 
-profiles = ['evazubeck','23h46min','retronyc','f1rstoftheroll','analogue_people','filmphotomag','thomhavlik','magazine35mm','in.film.we.trust','prianalog','film.wave','shootfilmmag']
+profiles = ['stefan_froehlich','thefilmmagazine','nibera_35mm','neilkrug','evazubeck','23h46min','retronyc','f1rstoftheroll','analogue_people','filmphotomag','thomhavlik','magazine35mm','in.film.we.trust','prianalog','film.wave','shootfilmmag']
 random.shuffle(profiles)
 
 likes = 1
 
-while likes <= 50:
+while likes <= 30:
     for p in profiles:
         driver.get(f'https://www.instagram.com/{p}/')
         
-        sleep(2)
+        sleep(get_wait_time(min_wait_time,max_wait_time))
         
         followers = driver.find_element_by_xpath("//a[@href='/{}/followers/']".format(p))
         followers.click()
         
-        sleep(1)
+        sleep(get_wait_time(min_wait_time,max_wait_time))
         
         fBody  = driver.find_element_by_xpath("//div[@class='isgrP']")
         
         scroll = 0
-        while scroll < 5: # scroll 5 times
+        while scroll < 10:
             driver.execute_script('arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;', fBody)
             sleep(1)
             scroll += 1
@@ -63,33 +69,34 @@ while likes <= 50:
         for f in fList_unique:
             driver.get(f)
                        
-            sleep(2)
+            sleep(get_wait_time(min_wait_time,max_wait_time))
             
             driver.execute_script("window.scrollTo(0, 200);")
             
-            sleep(1)
+            sleep(get_wait_time(min_wait_time,max_wait_time))
             
             try:
                 pic = driver.find_element_by_class_name("kIKUG")  
                 pic.click()
             
-                sleep(2)
+                sleep(get_wait_time(min_wait_time,max_wait_time))
                 
                 like = driver.find_element_by_class_name('fr66n')
                 soup = bs(like.get_attribute('innerHTML'),'html.parser')
                 if(soup.find('svg')['aria-label'] == 'Like'):
                     like.click()
                     likes+=1
+                    print("Like counter: ", likes)
                     
-                sleep(2)                
+                sleep(get_wait_time(min_wait_time,max_wait_time))               
                 
             except:
                 print("No pics")
                 
-            if likes >= 50:
+            if likes >= 30:
                 break
         
-        sleep(30)
+            sleep(30)
         
 
 driver.close()
